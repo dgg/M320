@@ -81,3 +81,16 @@ Another model is keep a list of store references for each item.
 Another option is having a list of item ids in the store document.
 
 Which one to use depends on the queries adn the frequency of when items are started to be sold at a given store. Update the item when a new store sells it, or change the stores whenever when a new product is released. It depends.
+
+## One-to-One
+Usually 1-1 are properties of the same document.
+
+Related properties can also be embedded in a sub-document or referenced in another collection.
+
+## One to Zillions
+
+1-∞ is better defined by specifying the cardinalty of the relationship [min, likely, max].
+
+Maximum nuber is what we care the most of the relationship.
+
+Talking about thos big numbers, they need to be watched out as we would not want to retrieve such a high number of related entities in our app.
