@@ -47,3 +47,63 @@ It can also be a fact of live of duplicated information of a distributed system.
 MongoDB does not support foreign keys or cascading operations to maintain integrity. If that is needed, it needs to be implemented by the application.
 
 We can rely on change streams for deferred referential integrity. Or we can avoid embedding. Or we can use transactions
+
+## Attribute Pattern
+
+Polymorphism allows storing documents in the same collection with different schemas.<br/>
+The documents will have some common fields with the same meaning, there might be some others that appear in a subset of the documents and mean different things for different types and have different formats. There might be properties unique or unknonwn.
+
+If we have a lot of fields that we want to query, we might need indexes. Many indexes.
+
+We might want to use the attribute pattern.
+
+1. indentify the fields to transpose
+1. for each field and its value a named tuple is created: `{ k: "name_of_the_field", v: "value_of_the_field" }` and place them all inside a new array property (`props`, for instance). There could be a third field in the tuple with the unit, for example.
+1. Create an index on `{props.k: 1, props.v: 1 }`
+
+Another example: a movie has different fields for different dates of release in different countries:
+```js
+{
+    title: "Dunkirk",
+    release_USA: "2017/07/23",
+    release_Mexico: "2017/08/01",
+    release_France: "2017/08/01",
+    ...
+}
+```
+
+What if we wanted to find all the movies released between two dates across all countries?
+
+Moving to 
+```js
+{
+    title: "Dunkirk",
+    releases: [
+        {k: "USA", v: "2017/07/23" },
+        {k: "Mexico", v: "2017/08/01"},
+        {k: "France":, v: "2017/08/01" }
+    ]
+    ...
+}
+```
+makes the query so much simple.
+
+### Problem
+* Lots of similar fields with similar types and need to search accross those fields at once.
+
+* Another case is when only a subset of documents have many similar fields.
+
+### Solution
+Transform fields into a new array property of key, value pairs with the key being the name of the field and the value, its value. The create an index containing both key and value.
+
+### Use Cases
+* Searcheable characteristics of a product
+* Set of fields all having the same value type (list of dates)
+
+## Benefits/Tradeoffs
+
+* ✔ Easier to index
+* ✔ Allow variety of field names
+* ✔ Allows qualifying the relationship between key and value with a third tuple field.
+
+* ✘
