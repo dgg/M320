@@ -106,4 +106,40 @@ Transform fields into a new array property of key, value pairs with the key bein
 * ✔ Allow variety of field names
 * ✔ Allows qualifying the relationship between key and value with a third tuple field.
 
-* ✘
+## Extended Reference Pattern
+
+If you find yourself "joining" data between collections, event if the query is not so horrid, with a high volume of data, performance is a liability.
+
+Before `$lookup`, all joining had to be done in the application with multiple queries involved.
+
+`$graphLookup` allows recursive queries on the same collection, like on graph databases.
+
+Another way would be embedding in the one-side of the 1-* relationship. But... what if the joins come from the other side?<br/>
+Imagine a 1-* between a customer and its orders. But we usually query orders, not customers.
+
+Embedding the most used information (duplication) in the many-side while maintaining the reference field in the many, allows us to not having to join most of the time, but joining if we must at the expense of duplication.
+
+Duplication management:
+* minimize it: duplicate fields that change rarely and only the fields needed to avoif the join
+* After change in "master" information: identify what needs to be chanaged and do it straight away if we must or wait for a batch update to do it at a later stage
+
+In the example, duplicating is the right thing to do.
+
+### Problem
+* too many repetitive joins
+
+### Solution
+* identify the field on the lookup side
+* bring in those fields into the main object
+
+### Use Cases
+Catalog, mobile applications, real-time analytics.
+
+That is: optimize read operations by avoiding round-trips or touching too many pieces of data.
+
+### Benefits/Trade-offs
+* ✔ Faster reads
+* ✔ Reduced number of joins and lookups
+* ✘ Duplication if the extended reference contains data that changes a lot
+
+## Subset Pattern
