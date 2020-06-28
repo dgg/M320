@@ -143,3 +143,39 @@ That is: optimize read operations by avoiding round-trips or touching too many p
 * ✘ Duplication if the extended reference contains data that changes a lot
 
 ## Subset Pattern
+MongoDB tries to put in memory the working set (docs and portion of indexes that are accessed).
+
+If the working set does not fit in memory, MongoDB will start trying to occupy RAM and there will be a constant thrashing of data trying to make it to RAM just to be evicted shortly after for other data to get there.
+
+Solutions:
+* add more RAM (or more nodes to the cluster)
+* scale with sharding (or are more shards)
+* reduce the size of the working set
+
+Will focus on third. Get rid of part of huge documents that is not used so often.
+
+For example, for a movie, people might want to access only the main actors, top reviews or quotes. The rest can go into a separate collection.
+
+### Problem
+Working set does not fit in memory
+
+Or only some of the data of the working set is frequently used.
+
+Lots of pages evicted from memory
+
+### Solution
+Divide the document in two: fields that are often required and fields that are rarely required.
+
+The resulting relationship will be a 1-1 or 1-*.<br/>
+Part of the information is duplicated in the most used side.
+
+### Use Cases
+* List of review of a product.
+* List of comments on an article
+* List of actors in a movie
+
+### Benefits/Trade-offs
+* ✔ Smaller working set as most used docs are smaller
+* ✔ Short disk access from most used collection
+* ✘ More round trips to the server when accessing less frequent information
+* ✘ Mor disk usage as information is duplicated
