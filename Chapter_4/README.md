@@ -107,15 +107,37 @@ IoT, data-warehousing, lots of information associated to a document
 
 ## Schema Versioning Pattern
 
+Schema is going to change, but mongo allows those changes without downtime because the schema is flexible.
+
+We can have documents that have a property and other documents with another array property. Each will be annotated with the version of the schema that it conforms to.<br/>
+In a relational database there is only one schema per table.
+
+The application will have to handle all different versions of the document. Additionally, the document can be brought forward to the latest version whenever is retrieved. When all docs are migrated to the latest version, it is up to us to remove the previous version handlers.
+
+Optionally, docs can be migrated via background jobs.
+
+
 ### Problem
+* Avoid downtime doing schema updates
+* Upgrade docs can take way too long
+* Not all documents need to be updated
 
 ### Solution
+Each doc has a schema version.
+
+The app can handle all version
+
+Pick a strategy to migrate the docs.
 
 ### Use Cases
+* Every app the has a production-deployed db
+* Systems with a lot of legacy data
 
 ### Benefits/Trade-offs
-* ✔ 
-* ✘ 
+* ✔ No downtime
+* ✔ Full control of migrations process
+* ✔ Less technical debt
+* ✘ May need multiple indexes fot the same field during migration period
 ## Tree Patterns
 
 ### Problem
