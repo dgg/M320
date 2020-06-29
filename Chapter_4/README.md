@@ -138,16 +138,116 @@ Pick a strategy to migrate the docs.
 * ✔ Full control of migrations process
 * ✔ Less technical debt
 * ✘ May need multiple indexes fot the same field during migration period
+
 ## Tree Patterns
+Model hierarchical information.
+
+There are several use cases for hirarchies between objects/nodes: organization charts, books in bookstore or product categorization.
+
+There are a set of common operations that are useful for these hierarchical data:
+* find ancestors of node X (faX)
+* find reports to Y (frY)
+* Find all nodes under Z (fuZ)
+* move children from parent N to parent P (mNP)
+* ...
+
+Documents are hierarchical by nature.
+
+### Structures
+
+There are several structures that can be combined. For example, using ancestors array and parent reference:
+
+```javascript
+{
+    _id: 8,
+    name: "Umbrellas",
+    parent: "Fashion",
+    ancestors: ["Swag", "Fashion"]
+}
+```
+
+to get the benefits of optimal operations from each model: frY, fuZ
+
+
+#### Parent references
+Doc has a ref to parent.
+```javascript
+{
+    name: "<string>",
+    parent: "name_of_parent"
+}
+```
+
+* faX is an aggregation with `$graphlookup` of the inmediate parents => !
+* frY `.find({parent: 'Y'})` => y 
+* fuZ is straighforward, but iteration over several docs is needed => ! 
+* mNP is single update where parent = N => y
+
+#### Child references
+Doc has an array property with inmediate children
+```javascript
+{
+    name: "<string>",
+    children: ["child_1", "child_2", ...]
+}
+```
+
+* faX => !
+* frY => !
+* fuZ is really simple and a single query `.find(name: Z, {children: 1})` => y
+* mNP => !
+
+#### Array of ancestors
+Doc has a ancestors array that represent the ancestors path.
+
+```javascript
+{
+    name: "<string>",
+    ancestors: ["parent", "grandparent", "great-grandparent"...]
+}
+```
+* faX `.find({name: X}, {ancestors: 1})` => y
+* frY => y
+* fuZ => y
+* mNP => !
+
+#### Materialized paths
+
+Doc as a ancestors string that represents ancestors path with a delimiter.
+
+```javascript
+{
+    name: "<string>",
+    ancestors: "parent.grandparent.great-grandparent"
+}
+```
+* faX `.find({ancestors: /\.Y$/} )` => y
+* frY => !
+* fuZ => !
+* mNP => !
 
 ### Problem
+* Represent hierarchical structured data
+* different access patterns to navigate the tree
+* Optimize for common operations
 
 ### Solution
+Use one or more:
+* child reference
+* parent reference
+* array of ancestors
+* materialized paths
 
 ### Use Cases
+* Org charts
+* Categorization
 
 ### Benefits/Trade-offs
-* ✔ 
+* ✔ child reference: easy to navigate to children or tree descending access
+* ✔ parent reference: immediate parent discovery and tree updates
+* ✔ array of ancestor: navigate upward the ancestor path
+* ✔ materialized path: use regex to find nodes in tree
+
 * ✘ 
 ## Polymorphic Pattern
 
