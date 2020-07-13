@@ -250,14 +250,35 @@ Use one or more:
 
 * ✘ 
 ## Polymorphic Pattern
+Organizing documents by either what is common or by what is different: same or different collection.
+
+Different collections involves more difficulties to find query results that come from both collections.<br/>
+=> Group things together because we want to query them together.
+
+E.g. vehicles collection that have cars (owner, taxes, #wheels), trucks (owner, taxes, #wheels, #axels) and boats (owner, taxes). Some doc types have properties that others have not. Having a vehicle discriminator (vehicle_type) is the canonic implementation of a polymorphic collection, because determines the expected shape of the document.
+
+Another case of polymorphism occurs in embedded sub-documents. For example a customer with several addresses in different countries. Addresses are different by country, containing different properties.<br/>
+Based on the country we can infer the shape of the sub-document.
+
+This pattern is commonly applied when we need a single (unified) view of the different types of documents. The relational solution to this problem is sub-optimal. When using document databases, the solution is much simpler.
+
+The schema versioning pattern is a case of polymorphic pattern. With the version being the discriminator.
 
 ### Problem
+Store in a single view (collection) objects that are more similar than different. 
 
 ### Solution
+Use a discriminator field that tracks the type of document or sub-document.
+
+The application is responsible to treat each type accordingly
 
 ### Use Cases
+* single-view systems
+* product catalogs
+* content management systems
 
 ### Benefits/Trade-offs
-* ✔ 
+* ✔ Easy to implement
+* ✔ Allows queries across a single collection
 * ✘ 
 ## Others
