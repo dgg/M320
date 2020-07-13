@@ -280,5 +280,63 @@ The application is responsible to treat each type accordingly
 ### Benefits/Trade-offs
 * ✔ Easy to implement
 * ✔ Allows queries across a single collection
-* ✘ 
+
 ## Others
+Applied less often.
+
+### Approximation Pattern
+Reduce the resources needed to perform some write operations.
+
+For example, tracking page views can be achieved writing to the db each time a page is viewed, but it can be too many writes whenever there are hundreds of thousands visits a day.<br/>
+Instead, we increment +10 or +100 once in a while.
+
+#### Problem
+* Data is expensive to calculate
+* Precission is not critical
+
+#### Solution
+Fewer writes, but with higher payload
+
+
+The application is responsible to treat each type accordingly
+
+#### Use Cases
+* visit counters
+* Counters tolerant to precision
+* Metric statistics
+
+#### Benefits/Trade-offs
+* ✔ Less writes
+* ✔ Less contention on documents
+* ✔ Statistically valid numbers
+* ✘ Not exact numbers
+* ✘ Application must implement the correct write logic
+
+### Outlier Pattern
+Handling documents that stand out from the rest.
+
+In big data scenarios, means you have few orders of magnitude higher than the norm.
+
+For example, famous singers have hundreths of millions followers, while majority have less than 1000.
+
+Outlier can drive developers to develop for the corner case, making it sub-optimal for 99% of the cases and hurting majority of queries.
+
+For example, tracking the names of the extras in a movie. For most movies, can embed the less than 1000 names in an array. For those movies that many more extras we can overflow that array into another collection and flag the originating document as an outlier. The application will know that the list of extras overflows into another collection.
+#### Problem
+* Few document could drive the overall solution
+* Managing those few documents would impact negatively majority of the queries
+
+#### Solution
+* Implement a solution that works for majority
+* Identify the exceptional docs with a field
+* Handle outliers differently
+
+#### Use Cases
+* Social networks
+* Popularity
+* Metric statistics
+
+#### Benefits/Trade-offs
+* ✔ Optimized solution for most use cases
+* ✘ Difference handle in the application
+* ✘ Difficult aggregated or ad-hoc queries (bc exception is handled application-side)
